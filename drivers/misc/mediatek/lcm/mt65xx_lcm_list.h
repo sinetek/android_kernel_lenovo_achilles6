@@ -298,6 +298,7 @@ extern struct LCM_DRIVER mipi_ft8201_video_1200p_lcm_drv;
 extern struct LCM_DRIVER mipi_hx83102e_video_1200p_lcm_drv;
 extern struct LCM_DRIVER ft8201_wxga_vdo_incell_boe_lcm_drv;
 extern struct LCM_DRIVER nt51021h_wuxga_vdo_oncell_boe_lcm_drv;
+extern struct LCM_DRIVER mipi_nt36523w_inx_video_1200p_lcm_drv;
 
 #ifdef BUILD_LK
 extern void mdelay(unsigned long msec);

@@ -37,6 +37,10 @@ struct LCM_DRIVER *lcm_driver_list[] = {
 	&mipi_hx83102e_video_1200p_lcm_drv,
 #endif
 
+#if defined(PANEL_MIPI_NT36523W_INX_VIDEO_1200P)
+    &mipi_nt36523w_inx_video_1200p_lcm_drv,
+#endif
+
 #if defined(OTM1284A_HD720_DSI_VDO_TM)
 	&otm1284a_hd720_dsi_vdo_tm_lcm_drv,
 #endif
