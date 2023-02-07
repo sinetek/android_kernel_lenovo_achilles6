@@ -689,7 +689,8 @@ static int bq2560x_detect_device(struct bq2560x* bq)
 */
 static void bq2560x_dump_regs(struct bq2560x *bq)
 {
-	int addr;
+#if 0
+    int addr;
 	u8 val;
 	int ret;
 	pr_err("ti bq25601 debug %s: \n", __func__);
@@ -698,8 +699,7 @@ static void bq2560x_dump_regs(struct bq2560x *bq)
 		if (ret == 0)
 			pr_err("ti bq25601 debug Reg[%.2x] = 0x%.2x\n", addr, val);
 	}
-
-
+#endif
 }
 
 static ssize_t bq2560x_show_registers(struct device *dev,
