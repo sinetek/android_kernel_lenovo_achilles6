@@ -476,9 +476,6 @@ int dynamic_debug_msg_print(unsigned int mva, int w, int h, int pitch,
 int display_enter_tui(void);
 int display_exit_tui(void);
 
-int primary_display_set_cabc(unsigned int enable);
-int primary_display_get_cabc(int *status);
-
 int primary_display_config_full_roi(struct disp_ddp_path_config *pconfig,
 	disp_path_handle disp_handle,
 		struct cmdqRecStruct *cmdq_handle);

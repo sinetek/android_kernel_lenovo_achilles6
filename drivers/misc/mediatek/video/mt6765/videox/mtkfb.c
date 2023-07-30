@@ -234,6 +234,55 @@ static int mtkfb_release(struct fb_info *info, int user)
 	return 0;
 }
 
+/* Store a single color palette entry into a pseudo palette or the hardware
+ * palette if one is available. For now we support only 16bpp and thus store
+ * the entry only to the pseudo palette.
+ */
+static int mtkfb_setcolreg(u_int regno, u_int red, u_int green,
+	u_int blue, u_int transp, struct fb_info *info)
+{
+	int r = 0;
+	unsigned int bpp, m;
+
+	NOT_REFERENCED(transp);
+
+	MSG_FUNC_ENTER();
+
+	bpp = info->var.bits_per_pixel;
+	m = 1 << bpp;
+	if (regno >= m) {
+		r = -EINVAL;
+		goto exit;
+	}
+
+	switch (bpp) {
+	case 16:
+		/* RGB 565 */
+		((u32 *) (info->pseudo_palette))[regno] =
+		    ((red & 0xF800) | ((green & 0xFC00) >> 5) |
+		    ((blue & 0xF800) >> 11));
+		break;
+	case 32:
+		/* ARGB8888 */
+		((u32 *) (info->pseudo_palette))[regno] =
+		    (0xff000000) |
+		    ((red & 0xFF00) << 8) | ((green & 0xFF00)) |
+		    ((blue & 0xFF00) >> 8);
+		break;
+
+		/* TODO: RGB888, BGR888, ABGR8888 */
+
+	default:
+		DISPERR("set color info fail,bpp=%d\n", bpp);
+		ASSERT(0);
+		r = -EINVAL;
+	}
+
+exit:
+	MSG_FUNC_LEAVE();
+	return r;
+}
+
 #if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && \
 	(CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 static int mtkfb1_blank(int blank_mode, struct fb_info *info)
@@ -1183,7 +1232,6 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd,
 	}
 	case MTKFB_CAPTURE_FRAMEBUFFER:
 	{
-#if 0 /* comment this for iofuzzer security issue */
 		unsigned long *src_pbuf = 0;
 		unsigned int pixel_bpp = primary_display_get_bpp() / 8;
 		unsigned int fbsize = DISP_GetScreenHeight() *
@@ -1210,12 +1258,10 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd,
 			r = -EFAULT;
 		}
 		vfree(src_pbuf);
-#endif
 		return r;
 	}
 	case MTKFB_SLT_AUTO_CAPTURE:
 	{
-#if 0 /* please open this when need SLT */
 		struct fb_slt_catpure capConfig;
 		unsigned long *src_pbuf = 0;
 		unsigned int format;
@@ -1272,7 +1318,6 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd,
 			r = -EFAULT;
 		}
 		vfree(src_pbuf);
-#endif
 		return r;
 	}
 	case MTKFB_GET_OVERLAY_LAYER_INFO:
@@ -1550,34 +1595,6 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd,
 		primary_display_trigger(1, NULL, 0);
 
 		return 0;
-	}
-	case SYSFS_SET_LCM_CABC_MODE:
-	{
-		int lcm_cabc_enable = 0;
-
-		lcm_cabc_enable = *(int*)arg;
-		if(primary_display_set_cabc(lcm_cabc_enable))
-		{
-			MTKFB_LOG("[MTKFB]: set CABC fail! line:%d\n",
-				__LINE__);
-			r = -EFAULT;
-		}
-		return r;
-	}
-
-	case SYSFS_GET_LCM_CABC_MODE:
-	{
-		int lcm_cabc_status = 0;
-
-		if(primary_display_get_cabc(&lcm_cabc_status)){
-			MTKFB_LOG("[MTKFB]: get CABC fail! line:%d\n",
-				__LINE__);
-			r = -EFAULT;
-		}
-
-		memcpy((void*)arg, (void*)&lcm_cabc_status, sizeof(int));
-
-		return r;
 	}
 	default:
 		DISPWARN(
@@ -1891,6 +1908,7 @@ static struct fb_ops mtkfb_ops = {
 	.owner = THIS_MODULE,
 	.fb_open = mtkfb_open,
 	.fb_release = mtkfb_release,
+  .fb_setcolreg = mtkfb_setcolreg,
 	.fb_pan_display = mtkfb_pan_display_proxy,
 	.fb_fillrect = cfb_fillrect,
 	.fb_copyarea = cfb_copyarea,

@@ -25,9 +25,6 @@
 #include <linux/of.h>
 #endif
 
-#include "linux/hardware_info.h"
-extern char Lcm_name[HARDWARE_MAX_ITEM_LONGTH];
-unsigned int g_default_panel_backlight_off = 0;
 /* This macro and arrya is designed for multiple LCM support */
 /* for multiple LCM, we should assign I/F Port id in lcm driver, */
 /* such as DPI0, DSI0/1 */
@@ -1048,9 +1045,6 @@ struct disp_lcm_handle *disp_lcm_probe(char *plcm_name,
 
 	DISPFUNC();
 	DISPCHECK("plcm_name=%s, is_lcm_inited %d\n", plcm_name, is_lcm_inited);
-        if (is_lcm_inited == 1){
-            strncpy(Lcm_name,plcm_name,strlen(plcm_name)+1);
-        }
 
 #if defined(MTK_LCM_DEVICE_TREE_SUPPORT)
 	if (check_lcm_node_from_DT() == 0) {
@@ -1327,29 +1321,15 @@ int disp_lcm_init(struct disp_lcm_handle *plcm, int force)
 	return 0;
 }
 
-struct LCM_BACKLIGHT_CUSTOM lcm_backlight_cust[6];
-unsigned int lcm_backlight_cust_count;
-
 struct LCM_PARAMS *disp_lcm_get_params(struct disp_lcm_handle *plcm)
 {
-
-	int i=0;
 	/* DISPFUNC(); */
 
-	if (_is_lcm_inited(plcm)){
-		g_default_panel_backlight_off = plcm->params->default_panel_bl_off;
-		for(i=0; i<6; i++)
-			lcm_backlight_cust[i] = plcm->params->backlight_cust[i];
-		lcm_backlight_cust_count = plcm->params->backlight_cust_count;
-
+	if (_is_lcm_inited(plcm))
 		return plcm->params;
-	}
 	else
 		return NULL;
 }
-
-EXPORT_SYMBOL(lcm_backlight_cust);
-EXPORT_SYMBOL(lcm_backlight_cust_count);
 
 enum LCM_INTERFACE_ID disp_lcm_get_interface_id(struct disp_lcm_handle *plcm)
 {
@@ -1524,15 +1504,12 @@ int disp_lcm_adjust_fps(void *cmdq, struct disp_lcm_handle *plcm, int fps)
 	return -1;
 }
 
-//#define BRIGHTNESS_MAX 255
-//#define BL_MAX 4095
 int disp_lcm_set_backlight(struct disp_lcm_handle *plcm,
 	void *handle, int level)
 {
 	struct LCM_DRIVER *lcm_drv = NULL;
-	/* int bl_value;*/
-	DISPFUNC();
 
+	DISPFUNC();
 	if (!_is_lcm_inited(plcm)) {
 		DISPERR("lcm_drv is null\n");
 		return -1;
@@ -1540,16 +1517,7 @@ int disp_lcm_set_backlight(struct disp_lcm_handle *plcm,
 
 	lcm_drv = plcm->drv;
 	if (lcm_drv->set_backlight_cmdq) {
-#ifdef CONFIG_LCM_BL_N6_Q
-#define BRIGHTNESS_MAX 255
-#define BL_MAX 4095
-		int bl_value = (BL_MAX*level)/BRIGHTNESS_MAX;
-		lcm_drv->set_backlight_cmdq(handle, bl_value);
-		DISPERR("disp_lcm_set_backlight:level:%d====>bl_value:%d\n", level, bl_value);
-#else
 		lcm_drv->set_backlight_cmdq(handle, level);
-		DISPERR("HW set level = %d\n",level);
-#endif
 	} else {
 		DISPERR("FATAL ERROR, lcm_drv->set_backlight is null\n");
 		return -1;
@@ -1557,50 +1525,6 @@ int disp_lcm_set_backlight(struct disp_lcm_handle *plcm,
 
 	return 0;
 }
-
-int disp_lcm_set_cabc(struct disp_lcm_handle *plcm,
-	void *handle, int enable)
-{
-	struct LCM_DRIVER *lcm_drv = NULL;
-
-	DISPFUNC();
-	if (!_is_lcm_inited(plcm)) {
-		DISPERR("lcm_drv is null\n");
-		return -1;
-	}
-
-	lcm_drv = plcm->drv;
-	if (lcm_drv->set_cabc_cmdq) {
-		lcm_drv->set_cabc_cmdq(handle, enable);
-	} else {
-		DISPERR("FATAL ERROR, lcm_drv->set_cabc_cmdq is null\n");
-		return -1;
-	}
-
-	return 0;
-}
-
-int disp_lcm_get_cabc(struct disp_lcm_handle *plcm, int *status)
-{
-	struct LCM_DRIVER *lcm_drv = NULL;
-
-	DISPFUNC();
-	if (!_is_lcm_inited(plcm)) {
-		DISPERR("lcm_drv is null\n");
-		return -1;
-	}
-
-	lcm_drv = plcm->drv;
-	if (lcm_drv->get_cabc_status) {
-		lcm_drv->get_cabc_status(status);
-	} else {
-		DISPERR("FATAL ERROR, lcm_drv->get_cabc_status is null\n");
-		return -1;
-	}
-
-	return 0;
-}
-
 
 int disp_lcm_ioctl(struct disp_lcm_handle *plcm, enum LCM_IOCTL ioctl,
 	unsigned int arg)
