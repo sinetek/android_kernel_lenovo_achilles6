@@ -50,15 +50,5 @@ bat_gm30: battery{
 	Q_MAX_SYS_VOLTAGE_BAT2 = <(3350)>;
 	/*	System shut down voltage.*/
 	Q_MAX_SYS_VOLTAGE_BAT3 = <(3350)>;
-/*+bug 516275  modify liuyong3.wt 20191129  Battery zcv table*/
-#if defined (CONFIG_MT6370_PMU_CHARGER)
-#include "battery_N21_NVT_4V4_4000mah.dtsi"
-#include "battery_N21_SCUD_4V4_4000mah.dtsi"
-#include "battery_N21_SCUD_SDI_4V4_4000mah.dtsi"
-#elif defined (CONFIG_MTK_BQ24157_SUPPORT)
-#include "battery_N6_SCUD_4V4_4000mah.dtsi"
-#include "battery_N6_SUNWODA_4V4_4000mah.dtsi"
-#include "battery_N6_NVT_4V4_4000mah.dtsi"
-#endif
-/*-bug 516275  modify liuyong3.wt 20191129  Battery zcv table*/
+#include "mt6765_battery_table_ext.dtsi"
 };
