@@ -52,6 +52,8 @@
 #define pr_info pr_debug
 #endif
 
+#define pr_err(...) ;
+
 static bool otg_en_bit = false;
 static bool hiz_en_bit = false;
 int pogo2_en = -1;
