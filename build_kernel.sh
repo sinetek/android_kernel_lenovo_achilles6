@@ -3,10 +3,6 @@
 # Written by Hakalle (Velosh) <hakalle@proton.me>.
 # Written by Philippe MB (sinetek) <pitwuu@gmail.com>.
 
-if [ ! -d gcc-arm64 ]; then
-  git clone "https://github.com/KenHV/gcc-arm64/"
-fi
-
 # Export KBUILD_BUILD_{USER,HOST} flags.
 export KBUILD_BUILD_USER="sinetek"
 export KBUILD_BUILD_HOST="github"
@@ -16,9 +12,7 @@ export ARCH="arm64"
 export SUBARCH="arm64"
 
 # sanitize path
-export PATH=/usr/bin
-#export PATH=$(pwd)/EvaGCC-arm64/bin:$PATH
-export PATH=$(pwd)/gcc-arm64/bin:$PATH
+export PATH=/bin:/usr/bin:/opt/gcc-arm64/bin
 
 # Export toolchain/clang/llvm flags
 export CROSS_COMPILE=aarch64-elf-
@@ -44,7 +38,6 @@ if [ "${WITH_OUTDIR}" == true ]; then
 fi
 
 if [ "${WITH_OUTDIR}" == true ]; then
-   make O="$(pwd)/a6" achilles6_row_wifi_defconfig
-   make O="$(pwd)/a6" menuconfig
-   make -j12 O="$(pwd)/a6"
+   #make O="$(pwd)/a6" achilles6_row_wifi_defconfig
+   make -j12 O="$(pwd)/a6" $@
 fi
