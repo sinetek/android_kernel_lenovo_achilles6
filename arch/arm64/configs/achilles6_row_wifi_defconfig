@@ -3397,6 +3397,7 @@ CONFIG_LEDS_CLASS=y
 #
 # CONFIG_LEDS_BLINKM is not set
 # CONFIG_LEDS_SYSCON is not set
+CONFIG_LEDS_AW2016=y
 
 #
 # LED Triggers
