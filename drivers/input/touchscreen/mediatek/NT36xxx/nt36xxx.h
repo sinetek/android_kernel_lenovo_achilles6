@@ -60,7 +60,7 @@ extern const uint16_t touch_key_array[TOUCH_KEY_NUM];
 //---Customerized func.---
 #define NVT_TOUCH_PROC 1
 #define NVT_TOUCH_EXT_PROC 1
-#define NVT_TOUCH_MP 1
+#define NVT_TOUCH_MP 0
 #define MT_PROTOCOL_B 1
 #define WAKEUP_GESTURE 0
 #if WAKEUP_GESTURE
@@ -78,29 +78,35 @@ extern const uint16_t gesture_key_array[];
 #define MAX_I2C_TRANSFER_SIZE            (MAX_TRANSACTION_LENGTH - 1)
 
 struct nvt_ts_mem_map {
-	uint32_t EVENT_BUF_ADDR;
-	uint32_t RAW_PIPE0_ADDR;
-	uint32_t RAW_PIPE0_Q_ADDR;
-	uint32_t RAW_PIPE1_ADDR;
-	uint32_t RAW_PIPE1_Q_ADDR;
-	uint32_t BASELINE_ADDR;
-	uint32_t BASELINE_Q_ADDR;
-	uint32_t BASELINE_BTN_ADDR;
-	uint32_t BASELINE_BTN_Q_ADDR;
-	uint32_t DIFF_PIPE0_ADDR;
-	uint32_t DIFF_PIPE0_Q_ADDR;
-	uint32_t DIFF_PIPE1_ADDR;
-	uint32_t DIFF_PIPE1_Q_ADDR;
-	uint32_t RAW_BTN_PIPE0_ADDR;
-	uint32_t RAW_BTN_PIPE0_Q_ADDR;
-	uint32_t RAW_BTN_PIPE1_ADDR;
-	uint32_t RAW_BTN_PIPE1_Q_ADDR;
-	uint32_t DIFF_BTN_PIPE0_ADDR;
-	uint32_t DIFF_BTN_PIPE0_Q_ADDR;
-	uint32_t DIFF_BTN_PIPE1_ADDR;
-	uint32_t DIFF_BTN_PIPE1_Q_ADDR;
-	uint32_t READ_FLASH_CHECKSUM_ADDR;
-	uint32_t RW_FLASH_DATA_ADDR;
+        uint32_t EVENT_BUF_ADDR;
+        uint32_t RAW_PIPE0_ADDR;
+        uint32_t RAW_PIPE1_ADDR;
+        uint32_t BASELINE_ADDR;
+        uint32_t BASELINE_BTN_ADDR;
+        uint32_t DIFF_PIPE0_ADDR;
+        uint32_t DIFF_PIPE1_ADDR;
+        uint32_t RAW_BTN_PIPE0_ADDR;
+        uint32_t RAW_BTN_PIPE1_ADDR;
+        uint32_t DIFF_BTN_PIPE0_ADDR;
+        uint32_t DIFF_BTN_PIPE1_ADDR;
+        uint32_t PEN_2D_BL_TIP_X_ADDR;
+        uint32_t PEN_2D_BL_TIP_Y_ADDR;
+        uint32_t PEN_2D_BL_RING_X_ADDR;
+        uint32_t PEN_2D_BL_RING_Y_ADDR;
+        uint32_t PEN_2D_DIFF_TIP_X_ADDR;
+        uint32_t PEN_2D_DIFF_TIP_Y_ADDR;
+        uint32_t PEN_2D_DIFF_RING_X_ADDR;
+        uint32_t PEN_2D_DIFF_RING_Y_ADDR;
+        uint32_t PEN_2D_RAW_TIP_X_ADDR;
+        uint32_t PEN_2D_RAW_TIP_Y_ADDR;
+        uint32_t PEN_2D_RAW_RING_X_ADDR;
+        uint32_t PEN_2D_RAW_RING_Y_ADDR;
+        uint32_t PEN_1D_DIFF_TIP_X_ADDR;
+        uint32_t PEN_1D_DIFF_TIP_Y_ADDR;
+        uint32_t PEN_1D_DIFF_RING_X_ADDR;
+        uint32_t PEN_1D_DIFF_RING_Y_ADDR;
+        uint32_t READ_FLASH_CHECKSUM_ADDR;
+        uint32_t RW_FLASH_DATA_ADDR;
 };
 
 struct nvt_ts_data {

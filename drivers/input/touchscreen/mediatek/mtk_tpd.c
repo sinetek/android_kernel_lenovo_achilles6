@@ -26,16 +26,6 @@
 #include <linux/compat.h>
 #endif
 
-#if defined(CONFIG_TOUCHSCREEN_MTK_IPIO) ||defined(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_TS_N6_Q) \
-	||defined(CONFIG_TOUCHSCREEN_HIMAX_CHIPSET_N6_Q)
-//#include "primary_display.h"
-//#include "disp_recovery.h"
-extern void _primary_path_switch_dst_unlock(void);
-extern void _primary_path_switch_dst_lock(void);
-
-extern void primary_display_esd_check_enable(int enable);
-#endif
-
 #if defined(CONFIG_MTK_S3320) || defined(CONFIG_MTK_S3320_50) \
 	|| defined(CONFIG_MTK_S3320_47) || defined(CONFIG_MTK_MIT200) \
 	|| defined(CONFIG_TOUCHSCREEN_SYNAPTICS_S3528) \
@@ -63,18 +53,6 @@ const struct of_device_id touch_of_match[] = {
 	{ .compatible = "mediatek,touch", },
 	{},
 };
-
-#if defined(CONFIG_TOUCHSCREEN_MTK_IPIO) || defined(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_TS_N6_Q) \
-	||defined(CONFIG_TOUCHSCREEN_HIMAX_CHIPSET_N6_Q)
-//+ add by songbinbo.wt for  ILITEK tp compitible focal tp  normal 20190411
-enum module_name{
-	XL_ILI9881_MODULE = 0,
-	TXD_ILI9881_MODULE= 1,
-	TM_FT_MODULE = 2,
-        LIDE_HIMAX = 3,
-};
-//- add by songbinbo.wt for  ILITEK tp compitible focal tp  normal 20190411
-#endif
 
 void tpd_get_dts_info(void)
 {
@@ -439,7 +417,9 @@ static void touch_resume_workqueue_callback(struct work_struct *work)
 	g_tpd_drv->resume(NULL);
 	tpd_suspend_flag = 0;
 }
-static int tpd_fb_notifier_callback(struct notifier_block *self,unsigned long event, void *data)
+static int tpd_fb_notifier_callback(
+			struct notifier_block *self,
+			unsigned long event, void *data)
 {
 	struct fb_event *evdata = NULL;
 	int blank;
@@ -449,60 +429,38 @@ static int tpd_fb_notifier_callback(struct notifier_block *self,unsigned long ev
 
 	evdata = data;
 	/* If we aren't interested in this event, skip it immediately ... */
-	//if (event != FB_EVENT_BLANK)
-	//	return 0;
-	if((event == FB_EVENT_BLANK) || (event == FB_EARLY_EVENT_BLANK)){
-		blank = *(int *)evdata->data;
+	if (event != FB_EVENT_BLANK)
+		return 0;
 
-		TPD_DMESG("fb_notify(blank=%d)\n", blank);
-		switch (blank) {
-		case FB_BLANK_UNBLANK:
-			if(event == FB_EVENT_BLANK){
-				TPD_DMESG("LCD ON Notify\n");
-				if (g_tpd_drv && tpd_suspend_flag) {
-					err = queue_work(touch_resume_workqueue,&touch_resume_work);
-					if (!err) {
-						TPD_DMESG("start resume_workqueue failed\n");
-						return err;
-					}
-
-#if defined(CONFIG_TOUCHSCREEN_MTK_IPIO) || defined(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_TS_N6_Q) \
-		||defined(CONFIG_TOUCHSCREEN_HIMAX_CHIPSET_N6_Q)
-					_primary_path_switch_dst_lock();
-					primary_display_esd_check_enable(1);
-					_primary_path_switch_dst_unlock();
-#endif
-				}
+	blank = *(int *)evdata->data;
+	TPD_DMESG("fb_notify(blank=%d)\n", blank);
+	switch (blank) {
+	case FB_BLANK_UNBLANK:
+		TPD_DMESG("LCD ON Notify\n");
+		if (g_tpd_drv && tpd_suspend_flag) {
+			err = queue_work(touch_resume_workqueue,
+						&touch_resume_work);
+			if (!err) {
+				TPD_DMESG("start resume_workqueue failed\n");
+				return err;
 			}
-			break;
-		case FB_BLANK_POWERDOWN:
-			if(event == FB_EARLY_EVENT_BLANK){
-				TPD_DMESG("LCD OFF Notify, tpd_suspend_flag = %d\n", tpd_suspend_flag);
-				if (g_tpd_drv && !tpd_suspend_flag) {
-
-#if defined(CONFIG_TOUCHSCREEN_MTK_IPIO) || defined(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_TS_N6_Q) \
-	||defined(CONFIG_TOUCHSCREEN_HIMAX_CHIPSET_N6_Q)
-					_primary_path_switch_dst_lock();
-					primary_display_esd_check_enable(0);
-					_primary_path_switch_dst_unlock();
-#endif
-
-					err = cancel_work_sync(&touch_resume_work);
-					if (!err)
-						TPD_DMESG("cancel resume_workqueue failed\n");
-
-					g_tpd_drv->suspend(NULL);
-				}
-				tpd_suspend_flag = 1;
-			}
-			break;
-		default:
-			break;
 		}
+		break;
+	case FB_BLANK_POWERDOWN:
+		TPD_DMESG("LCD OFF Notify\n");
+		if (g_tpd_drv && !tpd_suspend_flag) {
+			err = cancel_work_sync(&touch_resume_work);
+			if (!err)
+				TPD_DMESG("cancel resume_workqueue failed\n");
+			g_tpd_drv->suspend(NULL);
+		}
+		tpd_suspend_flag = 1;
+		break;
+	default:
+		break;
 	}
 	return 0;
 }
-
 /* Add driver: if find TPD_TYPE_CAPACITIVE driver successfully, loading it */
 int tpd_driver_add(struct tpd_driver_t *tpd_drv)
 {
@@ -569,82 +527,9 @@ static void tpd_create_attributes(struct device *dev, struct tpd_attrs *attrs)
 {
 	int num = attrs->num;
 
-	for (; num > 0;) {
-		if (device_create_file(dev, attrs->attr[--num]))
-			pr_info("mtk_tpd: tpd create attributes file failed\n");
-	}
+	for (; num > 0;)
+		device_create_file(dev, attrs->attr[--num]);
 }
-
-#if defined(CONFIG_TOUCHSCREEN_MTK_IPIO) || defined(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_TS_N6_Q) \
-		||defined(CONFIG_TOUCHSCREEN_HIMAX_CHIPSET_N6_Q)
-//+ add by songbinbo.wt for  ILITEK tp compitible focal tp  normal 20190411
-uint32_t lcm_name = -1;
-char tp_name[20] = { 0 };
-
-struct tag_videolfb {
-	u64 fb_base;
-	u32 islcmfound;
-	u32 fps;
-	u32 vram;
-	char lcmname[1];
-};
-static char mtkfb_lcm_name[256] = { 0 };
-
-static int __parse_tag_videolfb(struct device_node *node)
-{
-	struct tag_videolfb *videolfb_tag = NULL;
-	unsigned long size = 0;
-
-	videolfb_tag =
-		(struct tag_videolfb *)of_get_property(node,
-			"atag,videolfb", (int *)&size);
-	if (videolfb_tag) {
-		memset((void *)mtkfb_lcm_name, 0, sizeof(mtkfb_lcm_name));
-		strcpy((char *)mtkfb_lcm_name, videolfb_tag->lcmname);
-		mtkfb_lcm_name[strlen(videolfb_tag->lcmname)] = '\0';
-	}
-
-	printk("mtkfb_lcm_name is %s \n", mtkfb_lcm_name);
-
-	if(0==strcmp(mtkfb_lcm_name,"ili9881h_hd_plus_vdo_truly")){
-		lcm_name = XL_ILI9881_MODULE;    //ili9881h_hd_plus_vdo_truly
-		strcpy((char *)tp_name, "ILITEK_TDDI");
-	}else if(0==strcmp(mtkfb_lcm_name,"ili9881h_hd_plus_vdo_txd")){
-	    lcm_name =TXD_ILI9881_MODULE;   //ili9881h_hd_plus_vdo_txd
-	    strcpy((char *)tp_name, "ILITEK_TDDI");
-	}else if(0==strcmp(mtkfb_lcm_name,"ft8006p_hd_plus_vdo_tianma")){
-		lcm_name =TM_FT_MODULE;   //ili9881h_hd_plus_vdo_txd
-		strcpy((char *)tp_name, "fts_ts");
-	}else if(0==strcmp(mtkfb_lcm_name,"hx83112a_hd_plus_vdo_lide")){
-                  lcm_name = LIDE_HIMAX;
-	          strcpy((char *)tp_name, "hxmax_generic");
-        }else if(0==strcmp(mtkfb_lcm_name,"ili9881h_hd_plus_vdo_truly_m")){
-		lcm_name = XL_ILI9881_MODULE;    //ili9881h_hd_plus_vdo_truly
-		strcpy((char *)tp_name, "ILITEK_TDDI");
-	}
-
-	printk("[MTK_TPD] mtkfb_lcm_name is %s, lcm_name=%d, tp name is %s\n",mtkfb_lcm_name,lcm_name,tp_name);
-
-	return 0;
-}
-
-static int _parse_tag_videolfb(void)
-{
-	int ret;
-	struct device_node *chosen_node;
-
-	chosen_node = of_find_node_by_path("/chosen");
-	if (!chosen_node)
-		chosen_node = of_find_node_by_path("/chosen@0");
-
-	if (chosen_node)
-		ret = __parse_tag_videolfb(chosen_node);
-
-	return 0;
-}
-
-//- add by songbinbo.wt for  ILITEK tp compitible focal tp  normal 20190411
-#endif
 
 /* touch panel probe */
 static int tpd_probe(struct platform_device *pdev)
@@ -657,10 +542,6 @@ static int tpd_probe(struct platform_device *pdev)
 	int ret = 0;
 #endif
 #endif
-	#if defined(CONFIG_TOUCHSCREEN_MTK_IPIO) ||defined(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_TS_N6_Q) \
-	||defined(CONFIG_TOUCHSCREEN_HIMAX_CHIPSET_N6_Q)
-        _parse_tag_videolfb();// add by songbinbo.wt for  ILITEK tp compitible focal tp  normal 20190411
-	#endif
 
 	TPD_DMESG("enter %s, %d\n", __func__, __LINE__);
 
@@ -721,11 +602,11 @@ static int tpd_probe(struct platform_device *pdev)
 #endif
 #endif
 	}
-/*
+
 	if (2560 == TPD_RES_X)
 		TPD_RES_X = 2048;
 	if (1600 == TPD_RES_Y)
-		TPD_RES_Y = 1536;*/
+		TPD_RES_Y = 1536;
 	pr_debug("mtk_tpd: TPD_RES_X = %lu, TPD_RES_Y = %lu\n",
 		TPD_RES_X, TPD_RES_Y);
 
@@ -755,13 +636,6 @@ static int tpd_probe(struct platform_device *pdev)
 	for (i = 1; i < TP_DRV_MAX_COUNT; i++) {
 		/* add tpd driver into list */
 		if (tpd_driver_list[i].tpd_device_name != NULL) {
-			#if defined(CONFIG_TOUCHSCREEN_MTK_IPIO) || defined(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_TS_N6_Q) \
-					||defined(CONFIG_TOUCHSCREEN_HIMAX_CHIPSET_N6_Q)
-			//+ add by songbinbo.wt for  ILITEK tp compitible focal tp	normal 20190411
-			printk("tpd_driver_list[%d].tpd_device_name is %s, tp_name is %s\n", i, tpd_driver_list[i].tpd_device_name, tp_name);
-			if(strcmp(tpd_driver_list[i].tpd_device_name, tp_name)) continue;
-			//- add by songbinbo.wt for  ILITEK tp compitible focal tp  normal 20190411
-			#endif
 			tpd_driver_list[i].tpd_local_init();
 			/* msleep(1); */
 			if (tpd_load_status == 1) {
