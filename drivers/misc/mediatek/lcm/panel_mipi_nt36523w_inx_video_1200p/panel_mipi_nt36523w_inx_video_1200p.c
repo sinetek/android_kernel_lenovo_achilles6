@@ -419,14 +419,15 @@ static void lcm_set_util_funcs(const struct LCM_UTIL_FUNCS *util)
 static void lcm_get_params(struct LCM_PARAMS *params)
 {
         printk(KERN_INFO "lcm_get_params\n");
+
         memset(params, 0, sizeof(struct LCM_PARAMS));
+
         params->width = 1200;
         params->height = 1920;
         params->type = 2;
         params->physical_width = 138;
         params->physical_height = 222;
         params->dsi.mode = 1;
-        params->dsi.switch_mode = 0;
         params->dsi.switch_mode_enable = 0;
         params->dsi.LANE_NUM = 4;
         params->dsi.data_format.color_order = 0;
@@ -435,7 +436,7 @@ static void lcm_get_params(struct LCM_PARAMS *params)
         params->dsi.data_format.format = 2;
         params->dsi.packet_size = 256;
         params->dsi.PS = 2;
-        params->dsi.vertical_sync_active = 8;
+        params->dsi.vertical_sync_active = 2;
         params->dsi.vertical_backporch = 89;
         params->dsi.vertical_frontporch = 26;
         params->dsi.vertical_active_line = 1920;
@@ -445,6 +446,7 @@ static void lcm_get_params(struct LCM_PARAMS *params)
         params->dsi.horizontal_active_pixel = 1200;
         params->dsi.ssc_disable = 1;
         params->dsi.PLL_CLOCK = 550;
+	params->dsi.cont_clock = 0;
         params->dsi.clk_lp_per_line_enable = 1;
         params->dsi.customization_esd_check_enable = 0;
         params->dsi.esd_check_enable = 1;
@@ -453,6 +455,7 @@ static void lcm_get_params(struct LCM_PARAMS *params)
 static void lcm_init(void)
 {
         printk(KERN_INFO "lcm_init\n");
+
         OCP2131_write_bytes(0,0x14);
         MDELAY(2);
         OCP2131_write_bytes(1,0x14);
@@ -483,6 +486,7 @@ static void lcm_init(void)
 static void lcm_suspend(void)
 {
         printk(KERN_INFO "lcm_suspend\n");
+
         BACKLIGHT_GPIO_disable();
         MDELAY(5);
         push_table(NULL, lcm_suspend_setting, sizeof(lcm_suspend_setting) / sizeof(struct LCM_setting_table), 1);
@@ -495,6 +499,7 @@ static void lcm_suspend(void)
 static void lcm_resume(void)
 {
         printk(KERN_INFO "lcm_resume\n");
+
         lcm_init();
 }
 
@@ -519,7 +524,8 @@ static void lcm_update(unsigned int x,
                        unsigned int width,
                        unsigned int height)
 {
-		printk(KERN_INFO "lcm_update\n");
+	printk(KERN_INFO "lcm_update\n");
+
         unsigned int x0 = x;
         unsigned int y0 = y;
         unsigned int x1 = x0 + width - 1;
@@ -552,8 +558,6 @@ static void lcm_update(unsigned int x,
 
 static unsigned int lcm_compare_id()
 {
-        return 1;
-#if 0
         printk(KERN_INFO "lcm_compare_id\n");
 
         uint32_t data_array[3];
@@ -581,12 +585,12 @@ static unsigned int lcm_compare_id()
         id2 = buffer[0];
         push_table(NULL, t2, sizeof(t2) / sizeof(struct LCM_setting_table), 1);
         return id1 == 0x98 && id2 == 0x25;
-#endif
 }
 
 static void lcm_setbacklight_cmdq(void *handle, unsigned int level)
 {
         printk(KERN_INFO "lcm_setbacklight_cmdq\n");
+
         bl_level[0].para_list[0] = (level >> 4) & 0x0f;
         bl_level[0].para_list[1] = (level << 4);
         push_table(NULL, bl_level, sizeof(bl_level) / sizeof(struct LCM_setting_table), 1);
@@ -608,6 +612,7 @@ static unsigned int lcm_esd_check(void)
 static unsigned int lcm_ata_check(unsigned char *buffer)
 {
         printk(KERN_INFO "lcm_ata_check\n");
+
         uint32_t data_array[3];
         uint8_t read_buffer[4];
         int ret;
@@ -642,13 +647,13 @@ struct LCM_DRIVER mipi_nt36523w_inx_video_1200p_lcm_drv = {
         .set_util_funcs = lcm_set_util_funcs,
         .get_params = lcm_get_params,
         .init = lcm_init,
-        //.suspend = lcm_suspend,
-        //.resume = lcm_resume,
-        //.init_power = lcm_init_power,
-        //.suspend_power = lcm_suspend_power,
-        //.resume_power = lcm_resume_power,
+        .suspend = lcm_suspend,
+        .resume = lcm_resume,
+        .init_power = lcm_init_power,
+        .suspend_power = lcm_suspend_power,
+        .resume_power = lcm_resume_power,
         .update = lcm_update,
-        //.compare_id = lcm_compare_id,
+        .compare_id = lcm_compare_id,
         .set_backlight_cmdq = lcm_setbacklight_cmdq,
         .esd_check = lcm_esd_check,
         .ata_check = lcm_ata_check,
