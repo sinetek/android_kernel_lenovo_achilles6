@@ -500,6 +500,7 @@ struct disp_layer_info {
 	int res_idx;
 	unsigned int hrt_weight;
 	unsigned int hrt_idx;
+	unsigned int _;
 };
 
 enum DISP_SCENARIO {
