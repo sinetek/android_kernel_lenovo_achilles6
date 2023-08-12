@@ -490,17 +490,19 @@ struct layer_config {
 };
 
 struct disp_layer_info {
-	struct layer_config *input_config[2];
-	int disp_mode[2];
-	int layer_num[2];
-	int gles_head[2];
-	int gles_tail[2];
-	int hrt_num;
-	/* res_idx: SF/HWC selects which resolution to use */
-	int res_idx;
-	unsigned int hrt_weight;
-	unsigned int hrt_idx;
-	unsigned int _;
+        struct layer_config *input_config[2];
+        int disp_mode[2];
+        int layer_num[2];
+        int gles_head[2];
+        int gles_tail[2];
+        int hrt_num;
+        /* res_idx: SF/HWC selects which resolution to use */
+        int res_idx;
+        unsigned int hrt_weight;
+        unsigned int hrt_idx;
+
+        /*DynFPS*/
+        int active_config_id[2];
 };
 
 enum DISP_SCENARIO {

@@ -505,6 +505,13 @@ enum MIPITX_PHY_PORT {
 	MIPITX_PHY_PORT_1,
 	MIPITX_PHY_PORT_NUM
 };
+/*ARR*/
+#define DYNAMIC_FPS_LEVELS 10
+struct dynamic_fps_info {
+        unsigned int fps;
+        unsigned int vfp; /*lines*/
+        /*unsigned int idle_check_interval;*//*ms*/
+};
 
 
 struct LCM_DSI_PARAMS {
@@ -833,6 +840,7 @@ struct dsi_cmd_desc {
 	unsigned int vc;
 	unsigned int dlen;
 	unsigned int link_state;
+	unsigned int cmd; // STK ??
 	char *payload;
 };
 
