@@ -8,7 +8,7 @@ Unfortunately this project is dead. I have broken 2 devices while attempting to 
 
 The first mistake is not having a proper debugging setup. If I were to do this again, I would try to get a proper USB EHCI debugging cable. I do not know exactly if the X606F's USB controller is capable of supporting this EHCI dbug protocol, but I *have* gotten Gadget USB Serial mode working. That has not proven to be good enough, as it doesn't support early printk debugging, but the EHCI debugging *should* support all of that.
 
-If you have some financial means, wish to see recent Linux kernels running on Lenovo Tablets or other Mediatek tablets, with all the latest bells and whistles like KernelSU, and wish to help this project, please [get in touch](pitwuu@gmail.com).
+If you have some financial means, wish to see recent Linux kernels running on Lenovo Tablets or other Mediatek tablets, with all the latest bells and whistles like KernelSU, and wish to help this project, please get in touch: <pitwuu@gmail.com>.
 
 ## The LCM MIPI Interface
 
